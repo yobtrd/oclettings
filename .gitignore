@@ -15,6 +15,8 @@ env/
 # IDE
 .vscode/
 
-# Coverage
-.coverage
+# Dev
+.pytest_cache/
+.ruff_cache/
+.coverage/
 htmlcov/
