@@ -2,7 +2,6 @@
 
 from django.db import migrations
 
-
 def copy_data(apps, schema_editor):
     OldAddress = apps.get_model("oc_lettings_site", "Address")
     OldLetting = apps.get_model("oc_lettings_site", "Letting")

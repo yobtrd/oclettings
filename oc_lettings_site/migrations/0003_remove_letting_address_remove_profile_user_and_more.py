@@ -6,7 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oc_lettings_site', '0002_alter_address_id_alter_letting_id_alter_profile_id_and_more'),
+        (
+            "oc_lettings_site",
+            "0002_alter_address_id_alter_letting_id_alter_profile_id_and_more",
+        ),
+        ("lettings", "0002_copy_data"),
+        ("profiles", "0002_copy_data"),
     ]
 
     operations = [
