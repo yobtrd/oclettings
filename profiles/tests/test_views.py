@@ -39,3 +39,4 @@ def test_profile_view_returns_404_for_unknown_profile(client):
     response = client.get("/profiles/UnknownUser/")
 
     assert response.status_code == 404
+    assertTemplateUsed(response, "404.html")

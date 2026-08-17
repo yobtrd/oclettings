@@ -1,3 +1,4 @@
+import pytest
 from django.urls import resolve, reverse
 from pytest_django.asserts import assertTemplateUsed
 
@@ -42,3 +43,11 @@ def test_index_view(client):
 
     assert response.status_code == 200
     assertTemplateUsed(response, "index.html")
+
+
+@pytest.mark.django_db
+def test_unknown_url_returns_404(client):
+    response = client.get("/this-does-not-exist/")
+
+    assert response.status_code == 404
+    assertTemplateUsed(response, "404.html")

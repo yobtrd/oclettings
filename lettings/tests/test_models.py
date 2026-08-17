@@ -98,3 +98,8 @@ def test_deleting_address_deletes_letting():
     address.delete()
 
     assert not Letting.objects.filter(id=letting_id).exists()
+
+
+def test_address_verbose_names():
+    assert Address._meta.verbose_name == "Address"
+    assert Address._meta.verbose_name_plural == "Addresses"

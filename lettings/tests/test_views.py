@@ -41,3 +41,4 @@ def test_letting_view_returns_404_for_unknown_letting(client):
     response = client.get("/lettings/999999/")
 
     assert response.status_code == 404
+    assertTemplateUsed(response, "404.html")
