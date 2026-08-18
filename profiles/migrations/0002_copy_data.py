@@ -2,16 +2,31 @@
 
 from django.db import migrations
 
+
+BATCH_SIZE = 1000
+
+
 def copy_data(apps, schema_editor):
     OldProfile = apps.get_model("oc_lettings_site", "Profile")
     NewProfile = apps.get_model("profiles", "Profile")
 
-    for old_profile in OldProfile.objects.all():
-        NewProfile.objects.create(
-            id=old_profile.id,
-            user_id=old_profile.user_id,
-            favorite_city=old_profile.favorite_city,
+    profiles = []
+
+    for old_profile in OldProfile.objects.iterator(chunk_size=BATCH_SIZE):
+        profiles.append(
+            NewProfile(
+                id=old_profile.id,
+                user_id=old_profile.user_id,
+                favorite_city=old_profile.favorite_city,
+            )
         )
+
+        if len(profiles) >= BATCH_SIZE:
+            NewProfile.objects.bulk_create(profiles)
+            profiles = []
+
+    if profiles:
+        NewProfile.objects.bulk_create(profiles)
 
 
 class Migration(migrations.Migration):

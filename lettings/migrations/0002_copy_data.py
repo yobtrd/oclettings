@@ -2,6 +2,8 @@
 
 from django.db import migrations
 
+BATCH_SIZE = 1000
+
 def copy_data(apps, schema_editor):
     OldAddress = apps.get_model("oc_lettings_site", "Address")
     OldLetting = apps.get_model("oc_lettings_site", "Letting")
@@ -9,23 +11,44 @@ def copy_data(apps, schema_editor):
     NewAddress = apps.get_model("lettings", "Address")
     NewLetting = apps.get_model("lettings", "Letting")
 
-    for old_address in OldAddress.objects.all():
-        NewAddress.objects.create(
-            id=old_address.id,
-            number=old_address.number,
-            street=old_address.street,
-            city=old_address.city,
-            state=old_address.state,
-            zip_code=old_address.zip_code,
-            country_iso_code=old_address.country_iso_code,
+    addresses = []
+
+    for old_address in OldAddress.objects.iterator(chunk_size=BATCH_SIZE):
+        addresses.append(
+            NewAddress(
+                id=old_address.id,
+                number=old_address.number,
+                street=old_address.street,
+                city=old_address.city,
+                state=old_address.state,
+                zip_code=old_address.zip_code,
+                country_iso_code=old_address.country_iso_code,
+            )
         )
 
-    for old_letting in OldLetting.objects.all():
-        NewLetting.objects.create(
-            id=old_letting.id,
-            title=old_letting.title,
-            address_id=old_letting.address_id,
+        if len(addresses) >= BATCH_SIZE:
+            NewAddress.objects.bulk_create(addresses)
+            addresses = []
+
+    if addresses:
+        NewAddress.objects.bulk_create(addresses)
+
+    lettings = []
+    for old_letting in OldLetting.objects.iterator(chunk_size=BATCH_SIZE):
+        lettings.append(
+            NewLetting(
+                id=old_letting.id,
+                title=old_letting.title,
+                address_id=old_letting.address_id,
+            )
         )
+        if len(lettings) >= BATCH_SIZE:
+            NewLetting.objects.bulk_create(lettings)
+            lettings = []
+            
+    if lettings:
+        NewLetting.objects.bulk_create(lettings)
+
 
 class Migration(migrations.Migration):
 
