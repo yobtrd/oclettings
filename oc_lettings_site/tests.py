@@ -5,6 +5,14 @@ from pytest_django.asserts import assertTemplateUsed
 from oc_lettings_site import views
 
 
+# Config
+###########
+def test_environment():
+    from django.conf import settings
+
+    assert settings.ENVIRONMENT == "test"
+
+
 # URL
 ###########
 def test_oc_lettings_index_url():

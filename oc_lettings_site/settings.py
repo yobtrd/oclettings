@@ -1,21 +1,22 @@
 import os
 from pathlib import Path
 
+import environ
+import sentry_sdk
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Environment
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / ".env")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "fp$9^593hsriajg$_%=5trot9g!1qa@ew(o-1#@=&4%=hp46(s"
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-
+ENVIRONMENT = env("ENVIRONMENT", default="development")
+SECRET_KEY = env("SECRET_KEY")
+DEBUG = env.bool("DEBUG", default=True)
+SENTRY_DSN = env("SENTRY_DSN", default="")
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
 # Application definition
 
@@ -115,3 +116,11 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+# Monitoring
+
+if ENVIRONMENT != "test" and SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        environment=ENVIRONMENT,
+    )
