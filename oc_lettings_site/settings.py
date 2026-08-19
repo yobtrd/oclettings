@@ -1,8 +1,10 @@
+import logging
 import os
 from pathlib import Path
 
 import environ
 import sentry_sdk
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -117,10 +119,41 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# Monitoring
+# Logging & monitoring
 
 if ENVIRONMENT != "test" and SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         environment=ENVIRONMENT,
+        integrations=[
+            LoggingIntegration(
+                level=logging.INFO,
+                event_level=logging.ERROR,
+            ),
+        ],
     )
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
+        "lettings": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
+        "profiles": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
+    },
+}

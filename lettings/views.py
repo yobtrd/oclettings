@@ -1,6 +1,11 @@
+import logging
+
+from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 
 from .models import Letting
+
+logger = logging.getLogger(__name__)
 
 
 # Aenean leo magna, vestibulum et tincidunt fermentum, consectetur quis velit. Sed non placerat
@@ -22,7 +27,14 @@ def index(request):
 # bibendum lorem. Sed non dolor risus. Mauris condimentum auctor elementum. Donec quis nisi ligula.
 # Integer vehicula tincidunt enim, ac lacinia augue pulvinar sit amet.
 def letting(request, letting_id):
-    letting = get_object_or_404(Letting, id=letting_id)
+    try:
+        letting = get_object_or_404(Letting, id=letting_id)
+    except Http404:
+        logger.warning("Letting not found with id %s", letting_id)
+        raise
+
+    logger.info("Viewing letting with id %s", letting_id)
+
     context = {
         "title": letting.title,
         "address": letting.address,
