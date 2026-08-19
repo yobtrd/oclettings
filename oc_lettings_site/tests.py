@@ -1,3 +1,5 @@
+"""Tests for the oc_lettings_site application."""
+
 import pytest
 from django.urls import resolve, reverse
 from pytest_django.asserts import assertTemplateUsed
@@ -8,6 +10,7 @@ from oc_lettings_site import views
 # Config
 ###########
 def test_environment():
+    """Test that tests runs in the test environment."""
     from django.conf import settings
 
     assert settings.ENVIRONMENT == "test"
@@ -16,6 +19,7 @@ def test_environment():
 # URL
 ###########
 def test_oc_lettings_index_url():
+    """Test that the home page URL resolves correctly."""
     path = reverse("index")
 
     assert path == "/"
@@ -24,6 +28,7 @@ def test_oc_lettings_index_url():
 
 
 def test_lettings_root_url():
+    """Test that the lettings root URL resolves correctly."""
     path = reverse("lettings:index")
 
     assert path == "/lettings/"
@@ -31,6 +36,7 @@ def test_lettings_root_url():
 
 
 def test_profiles_root_url():
+    """Test that the profiles root URL resolves correctly."""
     path = reverse("profiles:index")
 
     assert path == "/profiles/"
@@ -38,6 +44,7 @@ def test_profiles_root_url():
 
 
 def test_admin_url():
+    """Test that the admin URL resolves correctly."""
     path = reverse("admin:index")
 
     assert path == "/admin/"
@@ -47,6 +54,7 @@ def test_admin_url():
 # Views
 ###########
 def test_index_view(client):
+    """Test that the home page is displayed correctly."""
     response = client.get("/")
 
     assert response.status_code == 200
@@ -55,6 +63,7 @@ def test_index_view(client):
 
 @pytest.mark.django_db
 def test_unknown_url_returns_404(client):
+    """Test that an unknown URL returns a 404 error page."""
     response = client.get("/this-does-not-exist/")
 
     assert response.status_code == 404

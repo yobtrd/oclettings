@@ -1,3 +1,5 @@
+"""Django settings for the oc_lettings_site project."""
+
 import logging
 import os
 from pathlib import Path
@@ -119,6 +121,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+
 # Logging & monitoring
 
 if ENVIRONMENT != "test" and SENTRY_DSN:
@@ -132,7 +135,6 @@ if ENVIRONMENT != "test" and SENTRY_DSN:
             ),
         ],
     )
-
 
 LOGGING = {
     "version": 1,

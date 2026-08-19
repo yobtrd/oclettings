@@ -1,3 +1,5 @@
+"""Views for the profiles application."""
+
 import logging
 
 from django.http import Http404
@@ -12,6 +14,12 @@ logger = logging.getLogger(__name__)
 # libero pulvinar eget. Fusc faucibus, urna quis auctor pharetra, massa dolor cursus neque,
 # quis dictum lacus d
 def index(request):
+    """
+    Display the list of profiles.
+
+    Args:
+        request: Django HTTP request object.
+    """
     profiles_list = Profile.objects.all()
     context = {"profiles_list": profiles_list}
     return render(request, "profiles/index.html", context)
@@ -22,6 +30,16 @@ def index(request):
 # id facilisis fringilla, eros leo tristique lacus, it. Nam aliquam dignissim congue.
 # Pellentesque habitant morbi tristique senectus et netus et males
 def profile(request, username):
+    """
+    Display the details of a user profile.
+
+    Retrieve a profile by the associated username and display its information.
+    Log a warning when the requested profile does not exist.
+
+    Args:
+        request: Django HTTP request object.
+        username: Username associated with the requested profile.
+    """
     try:
         profile = get_object_or_404(Profile, user__username=username)
     except Http404:

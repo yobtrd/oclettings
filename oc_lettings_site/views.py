@@ -1,3 +1,5 @@
+"""Views for the oc_lettings_site application."""
+
 from django.shortcuts import render
 
 
@@ -8,4 +10,5 @@ from django.shortcuts import render
 # Aliquam vitae erat ac orci placerat luctus. Nullam elementum urna nisi, pellentesque iaculis enim
 # cursus in. Praesent volutpat porttitor magna, non finibus neque cursus id.
 def index(request):
+    """Display the home page of the application."""
     return render(request, "index.html")

@@ -1,3 +1,5 @@
+"""Tests for the profiles application models."""
+
 import pytest
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -7,6 +9,7 @@ from profiles.models import Profile
 
 @pytest.mark.django_db
 def test_profile_str():
+    """Test that a profile returns its username as a string."""
     user = User.objects.create(
         username="Johndoe",
     )
@@ -20,6 +23,7 @@ def test_profile_str():
 
 @pytest.mark.django_db
 def test_profile_favorite_city_max_length():
+    """Test that a profile favorite city cannot exceed the maximum length."""
     user = User.objects.create(
         username="Johndoe",
     )
@@ -34,6 +38,7 @@ def test_profile_favorite_city_max_length():
 
 @pytest.mark.django_db
 def test_user_can_only_have_one_profile():
+    """Test that a user can only be associated with one profile."""
     user = User.objects.create(username="Johndoe")
 
     Profile.objects.create(
@@ -52,6 +57,7 @@ def test_user_can_only_have_one_profile():
 
 @pytest.mark.django_db
 def test_deleting_user_deletes_profile():
+    """Test that deleting a user also deletes its profile."""
     user = User.objects.create(
         username="Johndoe",
     )

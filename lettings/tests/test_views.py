@@ -1,3 +1,5 @@
+"""Tests for the lettings application views."""
+
 import pytest
 from pytest_django.asserts import assertTemplateUsed
 
@@ -6,6 +8,7 @@ from lettings.models import Address, Letting
 
 @pytest.mark.django_db
 def test_letting_index_view(client):
+    """Test that the lettings index view is displayed correctly."""
     response = client.get("/lettings/")
 
     assert response.status_code == 200
@@ -15,6 +18,7 @@ def test_letting_index_view(client):
 
 @pytest.mark.django_db
 def test_letting_view(client):
+    """Test that a letting detail view is displayed correctly."""
     address = Address.objects.create(
         number=12,
         street="Rue de Paris",
@@ -38,6 +42,7 @@ def test_letting_view(client):
 
 @pytest.mark.django_db
 def test_letting_view_returns_404_for_unknown_letting(client):
+    """Test that an unknown letting returns a 404 error page."""
     response = client.get("/lettings/999999/")
 
     assert response.status_code == 404

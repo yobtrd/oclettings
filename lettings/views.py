@@ -1,3 +1,5 @@
+"""Views for the lettings application."""
+
 import logging
 
 from django.http import Http404
@@ -12,6 +14,12 @@ logger = logging.getLogger(__name__)
 # massa. Integer est nunc, pulvinar a tempor et, bibendum id arcu. Vestibulum ante ipsum primis in
 # faucibus orci luctus et ultrices posuere cubilia curae; Cras eget scelerisque
 def index(request):
+    """
+    Display the list of available lettings.
+
+    Args:
+        request: Django HTTP request object.
+    """
     lettings_list = Letting.objects.all()
     context = {"lettings_list": lettings_list}
     return render(request, "lettings/index.html", context)
@@ -27,6 +35,16 @@ def index(request):
 # bibendum lorem. Sed non dolor risus. Mauris condimentum auctor elementum. Donec quis nisi ligula.
 # Integer vehicula tincidunt enim, ac lacinia augue pulvinar sit amet.
 def letting(request, letting_id):
+    """
+    Display the details of a letting.
+
+    Retrieve a letting by its identifier and display its title and address.
+    Log a warning when the requested letting does not exist.
+
+    Args:
+        request: Django HTTP request object.
+        letting_id: Identifier of the requested letting.
+    """
     try:
         letting = get_object_or_404(Letting, id=letting_id)
     except Http404:

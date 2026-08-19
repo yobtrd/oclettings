@@ -1,9 +1,12 @@
+"""Tests for the profiles application URLs."""
+
 from django.urls import resolve, reverse
 
 from profiles import views
 
 
 def test_profile_index_url():
+    """Test that the profiles index URL resolves correctly."""
     path = reverse("profiles:index")
 
     assert path == "/profiles/"
@@ -12,6 +15,7 @@ def test_profile_index_url():
 
 
 def test_profile_url():
+    """Test that the profile detail URL resolves correctly."""
     path = reverse("profiles:profile", kwargs={"username": "Johndoe"})
 
     assert path == "/profiles/Johndoe/"

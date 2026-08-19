@@ -1,3 +1,5 @@
+"""Tests for the lettings application models."""
+
 import pytest
 from django.core.exceptions import ValidationError
 
@@ -6,6 +8,7 @@ from lettings.models import Address, Letting
 
 @pytest.mark.django_db
 def test_address_str():
+    """Test that an address returns its number and street as a string."""
     address = Address.objects.create(
         number=12,
         street="Rue de Paris",
@@ -19,6 +22,7 @@ def test_address_str():
 
 
 def test_address_number_max_value():
+    """Test that an address number cannot exceed the maximum value."""
     address = Address(
         number=10000,
         street="Rue de Paris",
@@ -34,6 +38,7 @@ def test_address_number_max_value():
 
 @pytest.mark.django_db
 def test_letting_str():
+    """Test that a letting returns its title as a string."""
     address = Address.objects.create(
         number=12,
         street="Rue de Paris",
@@ -54,6 +59,7 @@ def test_letting_str():
 
 @pytest.mark.django_db
 def test_address_can_only_be_used_by_one_letting():
+    """Test that an address can only be associated with one letting."""
     address = Address.objects.create(
         number=12,
         street="Rue de Paris",
@@ -79,6 +85,7 @@ def test_address_can_only_be_used_by_one_letting():
 
 @pytest.mark.django_db
 def test_deleting_address_deletes_letting():
+    """Test that deleting an address also deletes its letting."""
     address = Address.objects.create(
         number=12,
         street="Rue de Paris",
@@ -101,5 +108,6 @@ def test_deleting_address_deletes_letting():
 
 
 def test_address_verbose_names():
+    """Test that the Address model has the correct singular and plural names."""
     assert Address._meta.verbose_name == "Address"
     assert Address._meta.verbose_name_plural == "Addresses"
