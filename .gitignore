@@ -13,10 +13,8 @@ venv/
 env/
 .env
 
-# IDE
-.vscode/
-
 # Dev
+.vscode/
 .ruff_cache/
 .coverage
 htmlcov/
