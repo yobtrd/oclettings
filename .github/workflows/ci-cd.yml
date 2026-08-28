@@ -7,6 +7,9 @@ on:
 jobs:
     test:
         runs-on: ubuntu-latest
+    
+        env:
+            SECRET_KEY: "ci-test-secret-key"
 
         steps:
             - name: Checkout
@@ -31,4 +34,7 @@ jobs:
 
             - name: Lint ruff
               run: uv run ruff check .
+
+            - name: Tests and coverage
+              run: uv run pytest --cov=. --cov-fail-under=80
 
