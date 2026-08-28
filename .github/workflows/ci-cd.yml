@@ -1,40 +1,90 @@
 name: CI/CD
 
-on: 
-    push:
-    pull_request:
+on:
+  push:
+  pull_request:
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-    
-        env:
-            SECRET_KEY: "ci-test-secret-key"
+  # Run linting, tests and coverage on every push and pull request.
+  test:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    # Django requires SECRET_KEY during test initialization.
+    # This is a non-sensitive key used only by the CI environment.
+    env:
+      SECRET_KEY: "ci-test-secret-key"
 
-            - name: Install uv
-              uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
-              with:
-                version: "0.11.26"
-                enable-cache: true
-    
-            - name: Set up Python
-              uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-              with:
-                python-version-file: ".python-version"
-            
-            - name: Install dependencies
-              run: uv sync --locked --dev
+    steps:
+      # Retrieve the project source code on the GitHub runner.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - name: Lint flake8
-              run: uv run flake8 .
+      # Install the UV package manager and cache downloaded dependencies
+      # to speed up subsequent workflow runs.
+      - name: Install uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.11.26"
+          enable-cache: true
 
-            - name: Lint ruff
-              run: uv run ruff check .
+      # Set up the Python version specified by the project.
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: ".python-version"
 
-            - name: Tests and coverage
-              run: uv run pytest --cov=. --cov-fail-under=80
+      # Install development dependencies from the lockfile without modifying it.
+      - name: Install dependencies
+        run: uv sync --locked --dev
 
+      # Check code quality with Flake8.
+      - name: Lint flake8
+        run: uv run flake8 .
+
+      # Check code quality with Ruff.
+      - name: Lint ruff
+        run: uv run ruff check .
+
+      # Run the test suite and fail if coverage is below 80%.
+      - name: Tests and coverage
+        run: uv run pytest --cov=. --cov-fail-under=80
+
+  # Build and publish the Docker image only after all tests pass.
+  # Containerization is restricted to pushes on the main branch.
+  container:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+  
+    steps:
+      # Retrieve the project source code on the GitHub runner.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+  
+      # Authenticate with Docker Hub using credentials stored as GitHub Secrets.
+      - name: Login to Docker Hub
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Create a short commit SHA to link the Docker image to its source commit.
+      - name: Set short commit SHA
+        id: commit
+        run: echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+  
+      # Set up Buildx to enable BuildKit features and GitHub Actions cache.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      # Build the Docker image and publish it to Docker Hub.
+      - name: Build and push Docker image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/oc-lettings:${{ steps.commit.outputs.short_sha }}
+
+          # Reuse Docker build layers between workflow runs to speed up builds.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
