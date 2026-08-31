@@ -88,3 +88,26 @@ jobs:
           # Reuse Docker build layers between workflow runs to speed up builds.
           cache-from: type=gha
           cache-to: type=gha,mode=max
+    
+  # Deploy the Docker image to Render only after the containerization job succeeds.
+  # Deployment is restricted to pushes on the main branch.
+  deploy:
+    needs: container
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      # Trigger a Render deployment using the Deploy Hook stored as a GitHub Secret.
+      # The image tag corresponding to the current commit is passed to Render
+      # so that the exact image built by the previous job is deployed.
+      - name: Deploy to Render
+        run: |
+          IMAGE="docker.io/${{ secrets.DOCKERHUB_USERNAME }}/oc-lettings:${GITHUB_SHA::7}"
+
+          # Call the Render Deploy Hook and pass the Docker image URL as an encoded parameter.
+          # --fail makes the step fail if Render returns an HTTP error.
+          curl --fail --request POST \
+            --get \
+            --data-urlencode "imgURL=$IMAGE" \
+            "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
