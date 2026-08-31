@@ -9,6 +9,7 @@ dependencies = [
     "django>=6.1",
     "django-environ>=0.14.0",
     "gunicorn>=26.1.0",
+    "psycopg[binary]>=3.3.4",
     "sentry-sdk>=2.68.0",
     "whitenoise>=6.12.0",
 ]
