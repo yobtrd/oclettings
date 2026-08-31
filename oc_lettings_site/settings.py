@@ -1,9 +1,9 @@
 """Django settings for the oc_lettings_site project."""
 
 import logging
-import os
 from pathlib import Path
 
+import dj_database_url
 import environ
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
@@ -21,6 +21,21 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=True)
 SENTRY_DSN = env("SENTRY_DSN", default="")
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+DATABASE_URL = env("DATABASE_URL", default="")
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+        )
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "oc-lettings-site.sqlite3",
+        }
+    }
+
 
 # Application definition
 
@@ -52,7 +67,7 @@ ROOT_URLCONF = "oc_lettings_site.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -66,17 +81,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "oc_lettings_site.wsgi.application"
-
-
-# Database
-# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "oc-lettings-site.sqlite3"),
-    }
-}
 
 
 # Password validation

@@ -34,5 +34,6 @@ USER nonroot
 # The port the container will listen on
 EXPOSE 8000
 
-# Run the production server using Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "oc_lettings_site.wsgi:application"]
+# Apply database migrations and start the production server with Gunicorn
+CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 oc_lettings_site.wsgi:application"]
+
