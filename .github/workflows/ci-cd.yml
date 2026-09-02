@@ -1,11 +1,12 @@
 name: CI/CD
 
+# Trigger the CI pipeline on every push and pull request.
 on:
   push:
   pull_request:
 
 jobs:
-  # Run linting, tests and coverage on every push and pull request.
+  # Run linting, tests and coverage.
   test:
     runs-on: ubuntu-latest
 
@@ -60,7 +61,7 @@ jobs:
       # Retrieve the project source code on the GitHub runner.
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-  
+
       # Authenticate with Docker Hub using credentials stored as GitHub Secrets.
       - name: Login to Docker Hub
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
@@ -72,18 +73,20 @@ jobs:
       - name: Set short commit SHA
         id: commit
         run: echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-  
+   
       # Set up Buildx to enable BuildKit features and GitHub Actions cache.
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
-      # Build the Docker image and publish it to Docker Hub.
+      # Build the Docker image and publish it to Docker Hub with Git hash tag and latest tag.
       - name: Build and push Docker image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/oc-lettings:${{ steps.commit.outputs.short_sha }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/oc-lettings:${{ steps.commit.outputs.short_sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/oc-lettings:latest
 
           # Reuse Docker build layers between workflow runs to speed up builds.
           cache-from: type=gha
@@ -97,17 +100,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Trigger a Render deployment using the Deploy Hook stored as a GitHub Secret.
-      # The image tag corresponding to the current commit is passed to Render
-      # so that the exact image built by the previous job is deployed.
+      # Trigger a Render deployment using the Deploy Hook stored as a GitHub Secret
+      # and deploy the image built for the current commit.
       - name: Deploy to Render
         run: |
           IMAGE="docker.io/${{ secrets.DOCKERHUB_USERNAME }}/oc-lettings:${GITHUB_SHA::7}"
-
-          # Call the Render Deploy Hook and pass the Docker image URL as an encoded parameter.
-          # --fail makes the step fail if Render returns an HTTP error.
-          curl --fail --request POST \
-            --get \
+          curl --fail --get \
             --data-urlencode "imgURL=$IMAGE" \
             "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
 
