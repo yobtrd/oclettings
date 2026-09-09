@@ -20,3 +20,6 @@ env/
 htmlcov/
 staticfiles/
 data.json
+docs/_build/
+
+
