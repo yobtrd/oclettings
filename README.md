@@ -1,77 +1,126 @@
-## Résumé
+# Orange County Lettings
 
-Site web d'Orange County Lettings
+## Présentation
 
-## Développement local
+Orange County Lettings est une application web développée avec Django permettant
+de consulter des annonces de locations immobilières et les profils associés.
 
-### Prérequis
+Le projet a été refactorisé afin d'améliorer sa modularité et sa maintenabilité,
+notamment grâce à la séparation des fonctionnalités en deux applications Django :
+`lettings` et `profiles`.
 
-- Compte GitHub avec accès en lecture à ce repository
-- Git CLI
-- SQLite3 CLI
-- Interpréteur Python, version 3.6 ou supérieure
+## Fonctionnalités principales
 
-Dans le reste de la documentation sur le développement local, il est supposé que la commande `python` de votre OS shell exécute l'interpréteur Python ci-dessus (à moins qu'un environnement virtuel ne soit activé).
+- Consultation des locations et de leur adresse.
+- Consultation des profils utilisateurs.
+- Administration des données via l'interface Django.
+- Monitoring des erreurs avec Sentry.
 
-### macOS / Linux
+## Stack technique
 
-#### Cloner le repository
+- **Python 3.12+**
+- **Django 6.1+**
+- **SQLite** en développement
+- **PostgreSQL** en production
+- **uv** pour la gestion du projet et des dépendances
+- **pytest / pytest-django / pytest-cov** pour les tests
+- **Ruff / Flake8** pour le linting
+- **Docker / Docker Hub** pour la conteneurisation
+- **GitHub Actions** pour la CI/CD
+- **Render** pour l'hébergement
+- **Sentry** pour le monitoring
 
-- `cd /path/to/put/project/in`
-- `git clone https://github.com/OpenClassrooms-Student-Center/Python-OC-Lettings-FR.git`
+## Prérequis
 
-#### Créer l'environnement virtuel
+- Python 3.12+
+- [uv](https://docs.astral.sh/uv/)
+- Git
+- Docker, pour l'exécution depuis une image Docker
 
-- `cd /path/to/Python-OC-Lettings-FR`
-- `python -m venv venv`
-- `apt-get install python3-venv` (Si l'étape précédente comporte des erreurs avec un paquet non trouvé sur Ubuntu)
-- Activer l'environnement `source venv/bin/activate`
-- Confirmer que la commande `python` exécute l'interpréteur Python dans l'environnement virtuel
-`which python`
-- Confirmer que la version de l'interpréteur Python est la version 3.6 ou supérieure `python --version`
-- Confirmer que la commande `pip` exécute l'exécutable pip dans l'environnement virtuel, `which pip`
-- Pour désactiver l'environnement, `deactivate`
+## Installation
 
-#### Exécuter le site
+Clonez le repository puis placez-vous dans le répertoire du projet :
 
-- `cd /path/to/Python-OC-Lettings-FR`
-- `source venv/bin/activate`
-- `pip install --requirement requirements.txt`
-- `python manage.py runserver`
-- Aller sur `http://localhost:8000` dans un navigateur.
-- Confirmer que le site fonctionne et qu'il est possible de naviguer (vous devriez voir plusieurs profils et locations).
+    git clone <URL_DU_DEPOT>
+    cd oclettings
 
-#### Linting
+Installez les dépendances avec `uv` :
 
-- `cd /path/to/Python-OC-Lettings-FR`
-- `source venv/bin/activate`
-- `flake8`
+    uv sync
 
-#### Tests unitaires
+Cette commande crée automatiquement l'environnement virtuel `.venv` et installe les dépendances du projet.
 
-- `cd /path/to/Python-OC-Lettings-FR`
-- `source venv/bin/activate`
-- `pytest`
+## Configuration
 
-#### Base de données
+Copiez le fichier d'exemple des variables d'environnement :
 
-- `cd /path/to/Python-OC-Lettings-FR`
-- Ouvrir une session shell `sqlite3`
-- Se connecter à la base de données `.open oc-lettings-site.sqlite3`
-- Afficher les tables dans la base de données `.tables`
-- Afficher les colonnes dans le tableau des profils, `pragma table_info(Python-OC-Lettings-FR_profile);`
-- Lancer une requête sur la table des profils, `select user_id, favorite_city from
-  Python-OC-Lettings-FR_profile where favorite_city like 'B%';`
-- `.quit` pour quitter
+    cp .env.example .env
 
-#### Panel d'administration
+Puis renseignez les valeurs adaptées à votre environnement, notamment `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS` et, si nécessaire, `SENTRY_DSN` et `DATABASE_URL`.
 
-- Aller sur `http://localhost:8000/admin`
-- Connectez-vous avec l'utilisateur `admin`, mot de passe `Abc1234!`
+En développement, l'application utilise SQLite par défaut.
 
-### Windows
+## Démarrage rapide
 
-Utilisation de PowerShell, comme ci-dessus sauf :
+Appliquez les migrations :
 
-- Pour activer l'environnement virtuel, `.\venv\Scripts\Activate.ps1` 
-- Remplacer `which <my-command>` par `(Get-Command <my-command>).Path`
+    uv run python manage.py migrate
+
+Lancez le serveur de développement :
+
+    uv run python manage.py runserver
+
+L'application est alors accessible à l'adresse `http://127.0.0.1:8000/`.
+
+L'interface d'administration est disponible à `http://127.0.0.1:8000/admin/`.
+
+Pour l'environnement de développement fourni, les identifiants sont :
+
+- **Utilisateur :** `admin`
+- **Mot de passe :** `Abc1234!`
+
+Ces identifiants sont réservés au développement et à la démonstration et ne doivent pas être utilisés en production.
+
+## Tests
+
+Exécutez la suite de tests avec :
+
+    uv run pytest
+
+La couverture peut être vérifiée avec :
+
+    uv run pytest --cov=. --cov-fail-under=80
+
+Un rapport HTML détaillé peut être généré avec :
+
+    uv run pytest --cov=. --cov-report=html
+
+## Docker
+
+Une image Docker est publiée sur Docker Hub à chaque déploiement sur `main`.
+
+Pour lancer une version précise de l'image depuis le répertoire du projet :
+
+    docker run --rm --pull always -p 8000:8000 --env-file .env <utilisateur>/oc-lettings:<commit-sha>
+
+Pour lancer directement la dernière version publiée :
+
+    docker run --rm --pull always -p 8000:8000 --env-file .env <utilisateur>/oc-lettings:latest
+
+Le fichier .env doit contenir les variables d'environnement nécessaires à l'application. Elles peuvent également être définies directement dans la commande docker run.
+
+## CI/CD et déploiement
+
+Le projet utilise **GitHub Actions** pour automatiser :
+
+- les contrôles Flake8 et Ruff ;
+- l'exécution des tests et la vérification de la couverture ;
+- la construction et la publication de l'image Docker ;
+- le déploiement sur Render.
+
+Le pipeline est exécuté sur les `push` et `pull_request`. La construction de l'image et le déploiement sont déclenchés uniquement sur `main`.
+
+## Documentation
+
+La documentation technique complète du projet est disponible sur
+[Read the Docs](https://ocl-oclettings.readthedocs.io/fr/latest/).
