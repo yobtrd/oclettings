@@ -1,34 +1,29 @@
 name: CI/CD
 
-# Trigger the CI pipeline on every push and pull request.
 on:
   push:
   pull_request:
 
 jobs:
-  # Run linting, tests and coverage.
+  # Validate code quality and tests
   test:
     runs-on: ubuntu-latest
 
-    # Django requires SECRET_KEY during test initialization.
-    # This is a non-sensitive key used only by the CI environment.
+    # Django requires SECRET_KEY during automated tests
     env:
       SECRET_KEY: "ci-test-secret-key"
 
     steps:
-      # Retrieve the project source code on the GitHub runner.
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # Install the UV package manager and cache downloaded dependencies
-      # to speed up subsequent workflow runs.
+      # Install uv and enable dependency cache
       - name: Install uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           version: "0.11.26"
           enable-cache: true
 
-      # Set up the Python version specified by the project.
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -38,15 +33,14 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked --dev
 
-      # Check code quality with Flake8.
+      # Check code quality
       - name: Lint flake8
         run: uv run flake8 .
 
-      # Check code quality with Ruff.
       - name: Lint ruff
         run: uv run ruff check .
 
-      # Run the test suite and fail if coverage is below 80%.
+      # Run tests and enforce coverage threshold
       - name: Tests and coverage
         run: uv run pytest --cov=. --cov-fail-under=80
 
@@ -58,7 +52,6 @@ jobs:
     runs-on: ubuntu-latest
   
     steps:
-      # Retrieve the project source code on the GitHub runner.
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -74,7 +67,7 @@ jobs:
         id: commit
         run: echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
    
-      # Set up Buildx to enable BuildKit features and GitHub Actions cache.
+      # Enable Docker BuildKit features and cache
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
