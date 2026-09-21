@@ -43,8 +43,9 @@ fichier ``uv.lock`` avec :
 
    uv sync --locked --dev
 
-L'option ``--locked`` garantit que le fichier de verrouillage n'est pas
-modifié pendant l'installation.
+L'option --locked force l'utilisation du fichier uv.lock existant et empêche 
+sa modification automatique. La commande échoue si le lockfile n'est pas cohérent
+avec le projet.
 
 Une variable ``SECRET_KEY`` spécifique à l'environnement CI est également
 définie afin de permettre l'initialisation de Django pendant l'exécution
@@ -125,10 +126,11 @@ image de base. Les dépendances de production sont installées avec :
 
 .. code-block:: bash
 
-   uv sync --frozen --no-dev
+   uv sync --locked --no-dev
 
-L'option ``--frozen`` garantit que le fichier ``uv.lock`` n'est pas modifié
-pendant la construction et que les versions verrouillées sont utilisées.
+L'option ``--locked`` utilise les versions définies dans ``uv.lock`` et
+vérifie que ce fichier reste cohérent avec ``pyproject.toml``. Si les deux
+fichiers ne correspondent pas, la construction de l'image échoue.
 
 Les fichiers statiques sont ensuite collectés pendant la construction de
 l'image :
@@ -358,22 +360,6 @@ suivre son activité et de faciliter le diagnostic des problèmes.
 
 Les loggers Django, ``lettings`` et ``profiles`` sont configurés avec un
 niveau ``INFO`` et écrivent leurs messages vers la sortie standard.
-
-Des logs sont ajoutés aux endroits pertinents du code afin de signaler les
-opérations importantes et les situations inhabituelles.
-
-Par exemple, la consultation d'une location est enregistrée au niveau
-``INFO`` tandis qu'une location inexistante génère un avertissement :
-
-.. code-block:: python
-
-    logger.info("Viewing letting with id %s", letting_id)
-
-    try:
-        letting = get_object_or_404(Letting, id=letting_id)
-    except Http404:
-        logger.warning("Letting not found with id %s", letting_id)
-        raise
 
 Ces logs permettent de disposer d'informations complémentaires lors de
 l'analyse du comportement de l'application.

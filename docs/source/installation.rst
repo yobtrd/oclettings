@@ -34,8 +34,7 @@ Installez les dépendances du projet :
 
 Cette commande crée automatiquement l'environnement virtuel ``.venv`` s'il
 n'existe pas et installe les dépendances de l'application ainsi que les
-dépendances de développement nécessaires aux tests, au linting et à la
-documentation.
+dépendances de développement nécessaires aux tests et au linting.
 
 .. _configuration:
 
